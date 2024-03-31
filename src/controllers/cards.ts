@@ -7,7 +7,7 @@ import { SERVER_ERROR_STATUS, WRONG_DATA_ERROR } from '../utils/error';
 export const getCards = (req: Request, res: Response) => Card.find({})
   .then((cards) => { res.send({ cards }); })
   .catch(() => {
-    res.status(SERVER_ERROR_STATUS).send('Что-то пошло не так');
+    res.status(SERVER_ERROR_STATUS).send('На сервере произошла ошибка');
   });
 
 export const createCard = (req: Request, res: Response) => {
@@ -27,7 +27,7 @@ export const createCard = (req: Request, res: Response) => {
       if (err.name === WRONG_DATA_ERROR.name || err.name === 'ValidationError') {
         res.status(WRONG_DATA_ERROR.status).send(err.message);
       } else {
-        res.status(SERVER_ERROR_STATUS).send('Что-то пошло не так');
+        res.status(SERVER_ERROR_STATUS).send('На сервере произошла ошибка');
       }
     });
 };
@@ -41,7 +41,7 @@ export const deleteCardById = (req: Request, res: Response) => {
       if (err.name === 'CastError') {
         res.status(WRONG_DATA_ERROR.status).send('Запрашиваемая карточка не найдена');
       } else {
-        res.status(SERVER_ERROR_STATUS).send('Что-то пошло не так');
+        res.status(SERVER_ERROR_STATUS).send('На сервере произошла ошибка');
       }
     });
 };
@@ -63,7 +63,7 @@ export const likeCard = (req: Request, res: Response) => {
       if (err.name === 'CastError') {
         res.status(WRONG_DATA_ERROR.status).send('Запрашиваемая карточка не найдена');
       } else {
-        res.status(SERVER_ERROR_STATUS).send('Что-то пошло не так');
+        res.status(SERVER_ERROR_STATUS).send('На сервере произошла ошибка');
       }
     });
 };
@@ -85,7 +85,7 @@ export const dislikeCard = (req: any, res: Response) => {
       if (err.name === 'CastError') {
         res.status(WRONG_DATA_ERROR.status).send('Запрашиваемая карточка не найдена');
       } else {
-        res.status(SERVER_ERROR_STATUS).send('Что-то пошло не так');
+        res.status(SERVER_ERROR_STATUS).send('На сервере произошла ошибка');
       }
     });
 };
