@@ -6,7 +6,7 @@ import { SERVER_ERROR_STATUS, WRONG_DATA_ERROR } from '../utils/error';
 export const getUsers = (req: Request, res: Response) => User.find({})
   .then((users) => res.send({ users }))
   .catch(() => {
-    res.status(SERVER_ERROR_STATUS).send('Что-то пошло не так');
+    res.status(SERVER_ERROR_STATUS).send('На сервере произошла ошибка');
   });
 
 export const getUserById = (req: Request, res: Response) => User.findById(req.params.userId)
@@ -15,7 +15,7 @@ export const getUserById = (req: Request, res: Response) => User.findById(req.pa
     if (err.name === 'CastError') {
       res.status(WRONG_DATA_ERROR.status).send('Запрашиваемый пользователь не найден');
     } else {
-      res.status(SERVER_ERROR_STATUS).send('Что-то пошло не так');
+      res.status(SERVER_ERROR_STATUS).send('На сервере произошла ошибка');
     }
   });
 
@@ -35,7 +35,7 @@ export const createUser = (req: Request, res: Response) => {
       if (err.name === WRONG_DATA_ERROR.name || err.name === 'ValidationError') {
         res.status(WRONG_DATA_ERROR.status).send(err.message);
       } else {
-        res.status(SERVER_ERROR_STATUS).send('Что-то пошло не так');
+        res.status(SERVER_ERROR_STATUS).send('На сервере произошла ошибка');
       }
     });
 };
@@ -62,7 +62,7 @@ export const updateUser = (req: Request, res: Response) => {
       } else if (err.name === 'CastError') {
         res.status(WRONG_DATA_ERROR.status).send('Запрашиваемый пользователь не найден');
       } else {
-        res.status(SERVER_ERROR_STATUS).send('Что-то пошло не так');
+        res.status(SERVER_ERROR_STATUS).send('На сервере произошла ошибка');
       }
     });
 };
@@ -89,7 +89,7 @@ export const updateAvatar = (req: Request, res: Response) => {
       } else if (err.name === 'CastError') {
         res.status(WRONG_DATA_ERROR.status).send('Запрашиваемый пользователь не найден');
       } else {
-        res.status(SERVER_ERROR_STATUS).send('Что-то пошло не так');
+        res.status(SERVER_ERROR_STATUS).send('На сервере произошла ошибка');
       }
     });
 };
