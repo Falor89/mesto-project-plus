@@ -1,56 +1,47 @@
-import { Response, Request } from 'express';
+import { Response, Request, NextFunction } from 'express';
 import { RequestCustom } from '../utils/types';
 import Card from '../models/card';
 import User from '../models/user';
-import { SERVER_ERROR_STATUS, WRONG_DATA_ERROR } from '../utils/error';
+import { WrongDataError, NotFoundError } from '../utils/error';
 
-export const getCards = (req: Request, res: Response) => Card.find({})
+export const getCards = (req: Request, res: Response, next: NextFunction) => Card.find({})
   .then((cards) => { res.send({ cards }); })
-  .catch(() => {
-    res.status(SERVER_ERROR_STATUS).send('На сервере произошла ошибка');
-  });
+  .catch(next);
 
-export const createCard = (req: Request, res: Response) => {
+export const createCard = (req: Request, res: Response, next: NextFunction) => {
   const id = (req as RequestCustom)?.user?._id;
   const { name, link } = req.body;
 
   return Card.create({ name, link, owner: id })
     .then((card) => {
       if (!name || !link) {
-        const error = new Error(WRONG_DATA_ERROR.message);
-        error.name = WRONG_DATA_ERROR.name;
-        throw error;
+        throw new WrongDataError('Переданы не все данные');
       }
       res.send({ card });
     })
-    .catch((err) => {
-      if (err.name === WRONG_DATA_ERROR.name || err.name === 'ValidationError') {
-        res.status(WRONG_DATA_ERROR.status).send(err.message);
-      } else {
-        res.status(SERVER_ERROR_STATUS).send('На сервере произошла ошибка');
-      }
-    });
+    .catch(next);
 };
 
-export const deleteCardById = (req: Request, res: Response) => {
+export const deleteCardById = (req: Request, res: Response, next: NextFunction) => {
   const id = req.params.cardId;
 
-  return Card.findByIdAndDelete(id)
-    .then((card) => res.send(card))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(WRONG_DATA_ERROR.status).send('Запрашиваемая карточка не найдена');
-      } else {
-        res.status(SERVER_ERROR_STATUS).send('На сервере произошла ошибка');
+  return Card.findById(id)
+    .then((card) => {
+      if (!card) {
+        throw new NotFoundError('Такой карточки не существует');
       }
-    });
+      card?.delete();
+      res.send(card);
+    })
+    .catch(next);
 };
 
-export const likeCard = (req: Request, res: Response) => {
+export const likeCard = (req: Request, res: Response, next: NextFunction) => {
   const id = (req as RequestCustom)?.user?._id;
   User.findById(id)
     .catch(() => {
-      res.status(400).send('Передан неверный пользователь');
+      const error = new WrongDataError('Передан неверный пользователь');
+      res.status(error.status).send(error.message);
     });
 
   return Card.findByIdAndUpdate(req.params.cardId, {
@@ -59,33 +50,23 @@ export const likeCard = (req: Request, res: Response) => {
     new: true,
   })
     .then((card) => res.send({ card }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(WRONG_DATA_ERROR.status).send('Запрашиваемая карточка не найдена');
-      } else {
-        res.status(SERVER_ERROR_STATUS).send('На сервере произошла ошибка');
-      }
-    });
+    .catch(next);
 };
 
-export const dislikeCard = (req: any, res: Response) => {
-  const userId = req.user._id;
+export const dislikeCard = (req: any, res: Response, next: NextFunction) => {
+  const id = req.user._id;
 
-  Card.findByIdAndUpdate(
-    req.params.cardId,
-    {
-      $pull: { likes: userId },
-    },
-    { new: true },
-  )
-    .then((card) => {
-      res.send(card);
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(WRONG_DATA_ERROR.status).send('Запрашиваемая карточка не найдена');
-      } else {
-        res.status(SERVER_ERROR_STATUS).send('На сервере произошла ошибка');
-      }
+  User.findById(id)
+    .catch(() => {
+      const error = new WrongDataError('Передан неверный пользователь');
+      res.status(error.status).send(error.message);
     });
+
+  return Card.findByIdAndUpdate(req.params.cardId, {
+    $pull: { likes: id },
+  }, {
+    new: true,
+  })
+    .then((card) => res.send({ card }))
+    .catch(next);
 };
