@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { STATUS_OK, STATUS_CREATED } from '../utils/status-codes';
 import { RequestCustom } from '../utils/types';
 import User from '../models/user';
-import { WrongDataError } from '../utils/error';
 
 export const getUsers = (req: Request, res: Response, next: NextFunction) => User.find({})
   .then((users) => res.send({ users }))
@@ -32,18 +32,13 @@ export const createUser = (req: Request, res: Response, next: NextFunction) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => {
-      if (!password || email) {
-        throw new WrongDataError('Переданы не все данные');
-      }
-      return res.send({
-        name: user.name,
-        about: user.about,
-        avatar: user.avatar,
-        email: user.email,
-        _id: user._id,
-      });
-    })
+    .then((user) => res.status(STATUS_CREATED).send({
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
+      _id: user._id,
+    }))
     .catch(next);
 };
 
@@ -55,12 +50,7 @@ export const updateUser = (req: Request, res: Response, next: NextFunction) => {
     new: true,
     runValidators: true,
   })
-    .then((user) => {
-      if (!name || !about) {
-        throw new WrongDataError('Переданы не все данные');
-      }
-      return res.send({ user });
-    })
+    .then((user) => res.status(STATUS_OK).send({ user }))
     .catch(next);
 };
 
@@ -72,12 +62,7 @@ export const updateAvatar = (req: Request, res: Response, next: NextFunction) =>
     new: true,
     runValidators: true,
   })
-    .then((user) => {
-      if (!avatar) {
-        throw new WrongDataError('Переданы не все данные');
-      }
-      return res.send({ user });
-    })
+    .then((user) => res.status(STATUS_OK).send({ user }))
     .catch(next);
 };
 
