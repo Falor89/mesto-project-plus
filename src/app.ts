@@ -9,7 +9,7 @@ import auth from './middlewares/auth';
 import { requestLogger, errorLogger } from './middlewares/logger';
 import errorMiddleware from './middlewares/error';
 
-const PORT = 3000;
+const PORT = 3001;
 const app = express();
 
 app.use(express.json());

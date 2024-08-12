@@ -13,7 +13,7 @@ export const getMe = (req: RequestCustom, res: Response, next: NextFunction) => 
   const id = req?.user?._id;
 
   return User.findById(id)
-    .then((user) => res.send({ user }))
+    .then((user) => res.send(user))
     .catch(next);
 };
 
